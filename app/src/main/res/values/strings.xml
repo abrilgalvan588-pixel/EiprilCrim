@@ -1,0 +1,53 @@
+
+<resources>
+    <string name="app_name">EiprilCrim</string>
+    <string name="subtitulo_app">AULA DE CRIMINOLOGÍA</string>
+    <string name="lema_app">OBSERVAR · ANALIZAR · COMPRENDER</string>
+    <string name="titulo_login">Tu próxima investigación\ncomienza aquí.</string>
+    <string name="subtitulo_login">Accede a tu espacio de aprendizaje con casos simulados.</string>
+    <string name="correo">Correo</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="iniciar_sesion">Iniciar sesión</string>
+    <string name="olvidaste_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="pie_login">Entorno educativo · Casos 100% simulados</string>
+
+    <!-- Registro e inicio de sesión -->
+    <string name="nombre">Nombre completo</string>
+    <string name="crear_cuenta">Crear cuenta</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="ya_tienes_cuenta">¿Ya tienes una cuenta? Inicia sesión</string>
+    <string name="no_tienes_cuenta">¿No tienes una cuenta? Regístrate</string>
+    <string name="campos_vacios">Completa todos los campos.</string>
+    <string name="correo_existente">Este correo ya está registrado.</string>
+    <string name="registro_exitoso">¡Cuenta creada! Ahora inicia sesión.</string>
+    <string name="datos_incorrectos">Correo o contraseña incorrectos.</string>
+
+    <!-- Segunda pantalla -->
+    <string name="saludo_usuario">Hola, Abril</string>
+    <string name="buscar_placeholder">Buscar...</string>
+    <string name="laboratorio_titulo">TU LABORATORIO DE APRENDIZAJE</string>
+    <string name="dashboard_encabezado">Entrena tu mirada\ninvestigadora.</string>
+    <string name="dashboard_subtitulo">Explora, conecta evidencias y construye tu criterio criminológico.</string>
+    <string name="modulo_casos">Casos</string>
+    <string name="modulo_casos_desc">Practica el análisis</string>
+    <string name="modulo_glosario">Glosario</string>
+    <string name="modulo_glosario_desc">Conceptos esenciales</string>
+    <string name="modulo_protocolos">Protocolos</string>
+    <string name="modulo_protocolos_desc">Métodos paso a paso</string>
+    <string name="modulo_quiz">Quiz</string>
+    <string name="modulo_quiz_desc">Pon a prueba tu criterio</string>
+    <string name="pie_dashboard">Aprende en un entorno seguro. Todos los casos son simulados.</string>
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_perfil">Perfil</string>
+
+    <!-- Base de Datos & Nuevas Funcionalidades -->
+    <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="agregar_caso">+ Nuevo Caso</string>
+    <string name="agregar_protocolo">+ Nuevo Protocolo</string>
+    <string name="sin_casos">No hay casos registrados en la base de datos.</string>
+    <string name="sin_protocolos">No hay protocolos registrados en la base de datos.</string>
+    <string name="guardar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="realizar_quiz">Registrar prueba de Quiz</string>
+    <string name="calificacion_guardada">¡Quiz completado y guardado en la Base de Datos!</string>
+</resources>
