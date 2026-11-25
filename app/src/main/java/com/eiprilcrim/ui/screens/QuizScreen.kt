@@ -27,7 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,10 +112,10 @@ val preguntasQuizDemo = listOf(
 fun QuizScreen(
     onQuizFinalizado: (correctas: Int, total: Int) -> Unit = { _, _ -> }
 ) {
-    var indicePregunta by remember { mutableIntStateOf(0) }
-    var opcionSeleccionada by remember { mutableIntStateOf(-1) }
-    var respuestasCorrectas by remember { mutableIntStateOf(0) }
-    var mensajeValidacion by remember { mutableStateOf("") }
+    var indicePregunta by rememberSaveable { mutableIntStateOf(0) }
+    var opcionSeleccionada by rememberSaveable { mutableIntStateOf(-1) }
+    var respuestasCorrectas by rememberSaveable { mutableIntStateOf(0) }
+    var mensajeValidacion by rememberSaveable { mutableStateOf("") }
 
     val preguntaActual = preguntasQuizDemo[indicePregunta]
     val totalPreguntas = preguntasQuizDemo.size

@@ -36,7 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,8 +62,8 @@ val listaGlosarioDemo = listOf(
 fun GlosarioScreen(
     tabInicial: Int = 0
 ) {
-    var tabSeleccionada by remember { mutableIntStateOf(tabInicial) }
-    var busqueda by remember { mutableStateOf("") }
+    var tabSeleccionada by rememberSaveable { mutableIntStateOf(tabInicial) }
+    var busqueda by rememberSaveable { mutableStateOf("") }
     val pestanas = listOf("Glosario", "Protocolos")
 
     Column(
@@ -205,7 +205,7 @@ fun GlosarioScreen(
 
 @Composable
 private fun TarjetaExpandibleGlosario(item: TerminoGlosario) {
-    var expandido by remember { mutableStateOf(false) }
+    var expandido by rememberSaveable { mutableStateOf(false) }
 
     Card(
         modifier = Modifier

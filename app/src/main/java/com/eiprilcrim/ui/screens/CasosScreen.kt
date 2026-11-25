@@ -38,14 +38,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eiprilcrim.R
 
 data class CasoItem(
     val id: Int,
@@ -86,12 +88,11 @@ fun CasosScreen(
     onNuevoCasoClick: () -> Unit = {},
     onVolver: () -> Unit = {}
 ) {
-    var busqueda by remember { mutableStateOf("") }
-    var filtroNivel by remember { mutableStateOf("Todos") }
+    var busqueda by rememberSaveable { mutableStateOf("") }
+    var filtroNivel by rememberSaveable { mutableStateOf("Todos") }
 
     val niveles = listOf("Todos", "Fácil", "Medio", "Difícil")
 
-    // Filtrado en tiempo real por búsqueda y por Nivel
     val casosFiltrados = listaCasosDemo.filter { caso ->
         val coincideNivel = filtroNivel == "Todos" || caso.nivel.equals(filtroNivel, ignoreCase = true)
         val coincideBusqueda = busqueda.isBlank() || caso.titulo.contains(busqueda, ignoreCase = true) || caso.descripcion.contains(busqueda, ignoreCase = true)
