@@ -17,19 +17,24 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = TextPrimary,
     surfaceVariant = NavySecondary,
     onSurfaceVariant = TextSecondary,
+    outline = BorderColor,
     error = ErrorColor
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PurplePrimary,
-    onPrimary = TextPrimary,
-    secondary = PurpleAccent,
-    onSecondary = NavyBackground,
-    tertiary = PurpleLight,
-    background = PurpleLight,
-    onBackground = NavyBackground,
-    surface = TextPrimary,
-    onSurface = NavyBackground,
+    primary = LightPrimary,
+    onPrimary = LightText,
+    secondary = LightSecondary,
+    onSecondary = LightText,
+    tertiary = LightTertiary,
+    onTertiary = LightText,
+    background = LightBackground,
+    onBackground = LightText,
+    surface = LightSurface,
+    onSurface = LightText,
+    surfaceVariant = LightSurface,
+    onSurfaceVariant = LightTextSecondary,
+    outline = LightOutline,
     error = ErrorColor
 )
 

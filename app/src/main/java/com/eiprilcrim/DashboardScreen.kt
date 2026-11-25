@@ -23,9 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -44,12 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.domain.model.Usuario
-import com.eiprilcrim.ui.theme.NavyCard
-import com.eiprilcrim.ui.theme.NavySecondary
-import com.eiprilcrim.ui.theme.PurpleAccent
-import com.eiprilcrim.ui.theme.PurplePrimary
-import com.eiprilcrim.ui.theme.TextPrimary
-import com.eiprilcrim.ui.theme.TextSecondary
 
 @Composable
 fun DashboardScreen(
@@ -64,79 +56,10 @@ fun DashboardScreen(
     val textoGlosario = stringResource(R.string.modulo_glosario)
     val textoProtocolos = stringResource(R.string.modulo_protocolos)
     val textoQuiz = stringResource(R.string.modulo_quiz)
-    val textoPerfil = stringResource(R.string.nav_perfil)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = NavySecondary,
-        bottomBar = {
-            NavigationBar(
-                containerColor = Color(0xFF191D24),
-                contentColor = TextPrimary
-            ) {
-                NavigationBarItem(
-                    selected = tabSeleccionada == 0,
-                    onClick = { tabSeleccionada = 0 },
-                    icon = { Text("★", fontSize = 18.sp) },
-                    label = { Text(stringResource(R.string.nav_inicio), fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TextPrimary,
-                        selectedTextColor = TextPrimary,
-                        indicatorColor = PurplePrimary.copy(alpha = 0.35f),
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
-                )
-                NavigationBarItem(
-                    selected = tabSeleccionada == 1,
-                    onClick = {
-                        tabSeleccionada = 1
-                        onAbrirSeccion(textoCasos)
-                    },
-                    icon = { Text("▤", fontSize = 18.sp) },
-                    label = { Text(textoCasos, fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TextPrimary,
-                        selectedTextColor = TextPrimary,
-                        indicatorColor = PurplePrimary.copy(alpha = 0.35f),
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
-                )
-                NavigationBarItem(
-                    selected = tabSeleccionada == 2,
-                    onClick = {
-                        tabSeleccionada = 2
-                        onAbrirSeccion(textoGlosario)
-                    },
-                    icon = { Text("☰", fontSize = 18.sp) },
-                    label = { Text(textoGlosario, fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TextPrimary,
-                        selectedTextColor = TextPrimary,
-                        indicatorColor = PurplePrimary.copy(alpha = 0.35f),
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
-                )
-                NavigationBarItem(
-                    selected = tabSeleccionada == 3,
-                    onClick = {
-                        tabSeleccionada = 3
-                        onAbrirSeccion(textoPerfil)
-                    },
-                    icon = { Text("◉", fontSize = 18.sp) },
-                    label = { Text(textoPerfil, fontSize = 11.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TextPrimary,
-                        selectedTextColor = TextPrimary,
-                        indicatorColor = PurplePrimary.copy(alpha = 0.35f),
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
-                    )
-                )
-            }
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -146,7 +69,7 @@ fun DashboardScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            // Encabezado con saludo personalizado desde la BD
+            // Encabezado con saludo personalizado
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -154,22 +77,23 @@ fun DashboardScreen(
             ) {
                 Text(
                     text = "Hola, ${usuarioActual?.nombre ?: "Abril"}",
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .border(1.dp, TextSecondary.copy(alpha = 0.5f), CircleShape)
-                        .clickable { tabSeleccionada = 3 },
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        .clickable { onAbrirSeccion("Perfil") },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = usuarioActual?.nombre?.take(1)?.uppercase() ?: "A",
-                        color = TextPrimary,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -184,27 +108,27 @@ fun DashboardScreen(
                 placeholder = {
                     Text(
                         text = stringResource(R.string.buscar_placeholder),
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 },
                 leadingIcon = {
                     Text(
                         text = "⌕",
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 18.sp
                     )
                 },
                 singleLine = true,
                 shape = CircleShape,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF23272F),
-                    unfocusedContainerColor = Color(0xFF23272F),
-                    focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary,
-                    focusedBorderColor = PurpleAccent,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = Color.Transparent,
-                    cursorColor = PurpleAccent
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
@@ -212,10 +136,9 @@ fun DashboardScreen(
 
             when (tabSeleccionada) {
                 0 -> {
-                    // Pantalla Principal / Inicio del Dashboard
                     Text(
                         text = stringResource(R.string.laboratorio_titulo),
-                        color = PurpleAccent,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 1.sp
@@ -225,7 +148,7 @@ fun DashboardScreen(
 
                     Text(
                         text = stringResource(R.string.dashboard_encabezado),
-                        color = TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
                         lineHeight = 32.sp
@@ -235,7 +158,7 @@ fun DashboardScreen(
 
                     Text(
                         text = stringResource(R.string.dashboard_subtitulo),
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         lineHeight = 18.sp
                     )
@@ -293,13 +216,13 @@ fun DashboardScreen(
                     ) {
                         Text(
                             text = "🛡",
-                            color = PurpleAccent,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 15.sp
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.pie_dashboard),
-                            color = TextSecondary,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp,
                             lineHeight = 15.sp
                         )
@@ -307,42 +230,39 @@ fun DashboardScreen(
                 }
 
                 1 -> {
-                    // Pestaña Casos
                     Text(
                         text = textoCasos,
-                        color = TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.modulo_casos_desc),
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 }
 
                 2 -> {
-                    // Pestaña Glosario
                     Text(
                         text = textoGlosario,
-                        color = TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.modulo_glosario_desc),
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 }
 
                 3 -> {
-                    // Pestaña Perfil conectada a los datos del Usuario en Room
                     Text(
                         text = stringResource(R.string.nav_perfil),
-                        color = TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -351,20 +271,20 @@ fun DashboardScreen(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = NavyCard),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
                                 text = usuarioActual?.nombre ?: "Usuario",
-                                color = TextPrimary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = usuarioActual?.correo ?: "correo@ejemplo.com",
-                                color = TextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp
                             )
                         }
@@ -405,12 +325,12 @@ private fun TarjetaModulo(
         modifier = modifier
             .height(135.dp)
             .background(
-                color = NavyCard,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(18.dp)
             )
             .border(
                 width = 1.dp,
-                color = PurplePrimary.copy(alpha = 0.25f),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                 shape = RoundedCornerShape(18.dp)
             )
             .clickable { onClick() }
@@ -419,21 +339,21 @@ private fun TarjetaModulo(
     ) {
         Text(
             text = simbolo,
-            color = PurpleAccent,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 20.sp
         )
 
         Column {
             Text(
                 text = titulo,
-                color = TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = subtitulo,
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp
             )
         }

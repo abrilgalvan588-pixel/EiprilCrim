@@ -1,6 +1,5 @@
 package com.eiprilcrim.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,10 +12,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,12 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.R
-import com.eiprilcrim.ui.theme.NavyCard
-import com.eiprilcrim.ui.theme.NavySecondary
-import com.eiprilcrim.ui.theme.PurpleAccent
-import com.eiprilcrim.ui.theme.PurplePrimary
-import com.eiprilcrim.ui.theme.TextPrimary
-import com.eiprilcrim.ui.theme.TextSecondary
 
 data class CasoItem(
     val id: Int,
@@ -49,39 +49,58 @@ val listaCasosDemo = listOf(
 
 @Composable
 fun CasosScreen(
-    onCasoClick: (Int) -> Unit = {}
+    onCasoClick: (Int) -> Unit = {},
+    onNuevoCasoClick: () -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavySecondary)
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.modulo_casos),
-            color = TextPrimary,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = stringResource(R.string.modulo_casos_desc),
-            color = TextSecondary,
-            fontSize = 14.sp
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        listaCasosDemo.forEach { caso ->
-            TarjetaCaso(
-                caso = caso,
-                onClick = { onCasoClick(caso.id) }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNuevoCasoClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Nuevo caso"
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .statusBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 20.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.modulo_casos),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(14.dp))
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = stringResource(R.string.modulo_casos_desc),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            listaCasosDemo.forEach { caso ->
+                TarjetaCaso(
+                    caso = caso,
+                    onClick = { onCasoClick(caso.id) }
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+            }
         }
     }
 }
@@ -96,11 +115,11 @@ private fun TarjetaCaso(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = PurplePrimary.copy(alpha = 0.3f),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                 shape = RoundedCornerShape(16.dp)
             )
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = NavyCard),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -111,16 +130,16 @@ private fun TarjetaCaso(
             ) {
                 Text(
                     text = caso.titulo,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = caso.categoria,
-                    color = PurpleAccent,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -128,7 +147,7 @@ private fun TarjetaCaso(
 
             Text(
                 text = caso.descripcion,
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 lineHeight = 18.sp
             )

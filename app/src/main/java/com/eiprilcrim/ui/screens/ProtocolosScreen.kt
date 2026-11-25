@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,12 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.R
-import com.eiprilcrim.ui.theme.NavyCard
-import com.eiprilcrim.ui.theme.NavySecondary
-import com.eiprilcrim.ui.theme.PurpleAccent
-import com.eiprilcrim.ui.theme.PurplePrimary
-import com.eiprilcrim.ui.theme.TextPrimary
-import com.eiprilcrim.ui.theme.TextSecondary
 
 data class ProtocoloItem(
     val nombre: String,
@@ -45,14 +40,14 @@ fun ProtocolosScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(NavySecondary)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 20.dp)
     ) {
         Text(
             text = stringResource(R.string.modulo_protocolos),
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
@@ -61,7 +56,7 @@ fun ProtocolosScreen() {
 
         Text(
             text = stringResource(R.string.modulo_protocolos_desc),
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp
         )
 
@@ -71,21 +66,21 @@ fun ProtocolosScreen() {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, PurplePrimary.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
-                colors = CardDefaults.cardColors(containerColor = NavyCard),
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
                         text = protocolo.nombre,
-                        color = PurpleAccent,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = protocolo.pasospasobrief,
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         lineHeight = 18.sp
                     )

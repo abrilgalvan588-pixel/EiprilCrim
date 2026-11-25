@@ -50,4 +50,7 @@
     <string name="cancelar">Cancelar</string>
     <string name="realizar_quiz">Registrar prueba de Quiz</string>
     <string name="calificacion_guardada">¡Quiz completado y guardado en la Base de Datos!</string>
+
+    <!-- Bienvenida -->
+    <string name="mensaje_del_dia_texto">El futuro pertenece a quienes se preparan en el presente. Cada hora de estudio, cada reto superado y cada nueva experiencia construyen el camino hacia grandes oportunidades. No esperes que el éxito llegue por sí solo, conviértete en la persona capaz de alcanzarlo. Recuerda que el conocimiento es una inversión que nadie puede quitarte; todo lo que aprendes hoy fortalecerá tus habilidades, ampliará tus horizontes y te dará la confianza para enfrentar cualquier desafío. Cada esfuerzo, por pequeño que parezca, suma y te acerca a las metas que tanto deseas alcanzar. Prepárate con disciplina, cree en tu potencial y nunca dejes de aprender: las oportunidades llegan para quienes están listos para aprovecharlas.</string>
 </resources>
