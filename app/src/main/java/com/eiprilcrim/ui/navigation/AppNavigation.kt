@@ -52,7 +52,7 @@ fun AppNavigation(
         currentRoute == Screen.Login.route -> false
         currentRoute == Screen.Bienvenida.route -> false
         currentRoute.startsWith("formulario_caso") -> false
-        currentRoute == Screen.ResultadoQuiz.route -> false
+        currentRoute.startsWith("resultado_quiz") -> false
         currentRoute.startsWith("detalle_caso") -> false
         else -> true
     }
@@ -154,6 +154,11 @@ fun AppNavigation(
                     },
                     onNuevoCasoClick = {
                         navController.navigate(Screen.FormularioCaso.createRoute())
+                    },
+                    onVolver = {
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.Dashboard.route) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -186,7 +191,7 @@ fun AppNavigation(
             }
 
             composable(Screen.Glosario.route) {
-                GlosarioScreen()
+                GlosarioScreen(tabInicial = 0)
             }
 
             composable(Screen.Protocolos.route) {
@@ -195,14 +200,24 @@ fun AppNavigation(
 
             composable(Screen.Quiz.route) {
                 QuizScreen(
-                    onQuizFinalizado = {
-                        navController.navigate(Screen.ResultadoQuiz.route)
+                    onQuizFinalizado = { correctas, total ->
+                        navController.navigate(Screen.ResultadoQuiz.createRoute(correctas, total))
                     }
                 )
             }
 
-            composable(Screen.ResultadoQuiz.route) {
+            composable(
+                route = Screen.ResultadoQuiz.route,
+                arguments = listOf(
+                    navArgument("correctas") { type = NavType.IntType; defaultValue = 4 },
+                    navArgument("total") { type = NavType.IntType; defaultValue = 5 }
+                )
+            ) { backStackEntry ->
+                val correctas = backStackEntry.arguments?.getInt("correctas") ?: 4
+                val total = backStackEntry.arguments?.getInt("total") ?: 5
                 ResultadoQuizScreen(
+                    correctas = correctas,
+                    total = total,
                     onReintentar = {
                         navController.navigate(Screen.Quiz.route) {
                             popUpTo(Screen.ResultadoQuiz.route) { inclusive = true }

@@ -1,92 +1,47 @@
 package com.eiprilcrim.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.eiprilcrim.R
 
 data class ProtocoloItem(
     val nombre: String,
-    val pasospasobrief: String
+    val descripcion: String,
+    val pasos: List<String> = emptyList()
 )
 
 val listaProtocolosDemo = listOf(
-    ProtocoloItem("Preservación del Lugar del Hecho", "Acordonamiento de la zona, acristalamiento y registro de accesos autorizados."),
-    ProtocoloItem("Fijación Fotográfica Forense", "Toma de fotografías panorámicas, plano medio y gran acercamiento con escala métrica."),
-    ProtocoloItem("Embalaje de Evidencia Biológica", "Secado previo al aire, uso de bolsas de papel estériles y etiquetado con sello de inviolabilidad.")
+    ProtocoloItem(
+        nombre = "Preservación del Lugar del Hecho",
+        descripcion = "Acordonamiento de la zona, acristalamiento y registro de accesos autorizados.",
+        pasos = listOf(
+            "1. Acordonar el área primaria y secundaria.",
+            "2. Establecer una ruta segura de acceso para peritos.",
+            "3. Registrar a toda persona autorizada en la escena.",
+            "4. Evitar cualquier manipulación o contaminación de indicios."
+        )
+    ),
+    ProtocoloItem(
+        nombre = "Fijación Fotográfica Forense",
+        descripcion = "Toma de fotografías panorámicas, plano medio y gran acercamiento con escala métrica.",
+        pasos = listOf(
+            "1. Fotografías panorámicas generales de la escena.",
+            "2. Tomas en plano medio asociando los indicios entre sí.",
+            "3. Acercamientos con testigo métrico a cada indicio.",
+            "4. Registro minucioso en la ficha pericial."
+        )
+    ),
+    ProtocoloItem(
+        nombre = "Embalaje de Evidencia Biológica",
+        descripcion = "Secado previo al aire, uso de bolsas de papel estériles y etiquetado con sello de inviolabilidad.",
+        pasos = listOf(
+            "1. Secado al aire en ambiente controlado sin calor directo.",
+            "2. Colocación en bolsa o sobre de papel sin plastificar.",
+            "3. Sellado hermético con cinta de inviolabilidad.",
+            "4. Rotulado y firma de cadena de custodia."
+        )
+    )
 )
 
 @Composable
 fun ProtocolosScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.modulo_protocolos),
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = stringResource(R.string.modulo_protocolos_desc),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        listaProtocolosDemo.forEach { protocolo ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(16.dp)),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Text(
-                        text = protocolo.nombre,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = protocolo.pasospasobrief,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(14.dp))
-        }
-    }
+    GlosarioScreen(tabInicial = 1)
 }
