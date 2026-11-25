@@ -1,6 +1,9 @@
 package com.eiprilcrim.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -30,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,14 +44,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eiprilcrim.domain.repository.CasoRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleCasoScreen(
     casoId: Int,
+    casoRepository: CasoRepository? = null,
     onVolver: () -> Unit = {}
 ) {
     var casoGuardado by remember { mutableStateOf(false) }
+    var casoActual by remember { mutableStateOf<CasoItem?>(null) }
+
+    LaunchedEffect(casoId, casoRepository) {
+        if (casoRepository != null) {
+            val casoDb = casoRepository.obtenerPorId(casoId)
+            if (casoDb != null) {
+                casoActual = CasoItem(
+                    id = casoDb.id,
+                    titulo = casoDb.titulo,
+                    descripcion = casoDb.descripcion,
+                    categoria = casoDb.categoria,
+                    nivel = casoDb.nivel
+                )
+            } else {
+                casoActual = listaCasosDemo.find { it.id == casoId } ?: listaCasosDemo.first()
+            }
+        } else {
+            casoActual = listaCasosDemo.find { it.id == casoId } ?: listaCasosDemo.first()
+        }
+    }
+
+    val casoMostrado = casoActual ?: listaCasosDemo.first()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -55,7 +84,7 @@ fun DetalleCasoScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Caso $casoId",
+                        text = "Caso ${casoMostrado.id}",
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
@@ -85,7 +114,7 @@ fun DetalleCasoScreen(
                 .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
             Text(
-                text = "CASO SIMULADO · NIVEL FÁCIL",
+                text = "CASO SIMULADO · NIVEL ${casoMostrado.nivel.uppercase()}",
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
@@ -95,7 +124,7 @@ fun DetalleCasoScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "El indicio en la biblioteca",
+                text = casoMostrado.titulo,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -119,7 +148,7 @@ fun DetalleCasoScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Durante la inspección ocular en la biblioteca del instituto, se localizó un libro abierto con manchas biológicas en la página 42 y una huella latente sobre la cubierta de cuero.",
+                        text = casoMostrado.descripcion,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp,
                         lineHeight = 20.sp

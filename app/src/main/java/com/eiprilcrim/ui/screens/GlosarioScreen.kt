@@ -33,9 +33,11 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eiprilcrim.domain.repository.GlosarioRepository
+import com.eiprilcrim.domain.repository.ProtocoloRepository
 
 data class TerminoGlosario(
     val termino: String,
@@ -60,11 +64,47 @@ val listaGlosarioDemo = listOf(
 
 @Composable
 fun GlosarioScreen(
-    tabInicial: Int = 0
+    tabInicial: Int = 0,
+    glosarioRepository: GlosarioRepository? = null,
+    protocoloRepository: ProtocoloRepository? = null
 ) {
     var tabSeleccionada by rememberSaveable { mutableIntStateOf(tabInicial) }
     var busqueda by rememberSaveable { mutableStateOf("") }
+
+    var listaGlosario by remember { mutableStateOf<List<TerminoGlosario>>(emptyList()) }
+    var listaProtocolos by remember { mutableStateOf<List<ProtocoloItem>>(emptyList()) }
+
     val pestanas = listOf("Glosario", "Protocolos")
+
+    LaunchedEffect(busqueda, tabSeleccionada, glosarioRepository, protocoloRepository) {
+        if (tabSeleccionada == 0) {
+            if (glosarioRepository != null) {
+                val terminosDb = glosarioRepository.buscarTerminos(busqueda)
+                listaGlosario = if (terminosDb.isNotEmpty()) {
+                    terminosDb.map { TerminoGlosario(it.termino, it.definicion) }
+                } else {
+                    emptyList()
+                }
+            } else {
+                listaGlosario = listaGlosarioDemo.filter {
+                    busqueda.isBlank() || it.termino.contains(busqueda, ignoreCase = true) || it.definicion.contains(busqueda, ignoreCase = true)
+                }
+            }
+        } else {
+            if (protocoloRepository != null) {
+                val protocolosDb = protocoloRepository.buscarProtocolos(busqueda)
+                listaProtocolos = if (protocolosDb.isNotEmpty()) {
+                    protocolosDb.map { ProtocoloItem(it.nombre, it.descripcion, it.pasos) }
+                } else {
+                    emptyList()
+                }
+            } else {
+                listaProtocolos = listaProtocolosDemo.filter {
+                    busqueda.isBlank() || it.nombre.contains(busqueda, ignoreCase = true) || it.descripcion.contains(busqueda, ignoreCase = true)
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -159,12 +199,7 @@ fun GlosarioScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             if (tabSeleccionada == 0) {
-                // PESTAÑA GLOSARIO (Tarjetas expandibles con + / -)
-                val glosarioFiltrado = listaGlosarioDemo.filter {
-                    busqueda.isBlank() || it.termino.contains(busqueda, ignoreCase = true) || it.definicion.contains(busqueda, ignoreCase = true)
-                }
-
-                if (glosarioFiltrado.isEmpty()) {
+                if (listaGlosario.isEmpty()) {
                     Text(
                         text = "No se encontraron términos",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -173,18 +208,13 @@ fun GlosarioScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    glosarioFiltrado.forEach { item ->
+                    listaGlosario.forEach { item ->
                         TarjetaExpandibleGlosario(item = item)
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             } else {
-                // PESTAÑA PROTOCOLOS (Pasos numerados)
-                val protocolosFiltrados = listaProtocolosDemo.filter {
-                    busqueda.isBlank() || it.nombre.contains(busqueda, ignoreCase = true) || it.descripcion.contains(busqueda, ignoreCase = true)
-                }
-
-                if (protocolosFiltrados.isEmpty()) {
+                if (listaProtocolos.isEmpty()) {
                     Text(
                         text = "No se encontraron protocolos",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -193,7 +223,7 @@ fun GlosarioScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    protocolosFiltrados.forEach { protocolo ->
+                    listaProtocolos.forEach { protocolo ->
                         TarjetaProtocoloPasos(protocolo = protocolo)
                         Spacer(modifier = Modifier.height(14.dp))
                     }

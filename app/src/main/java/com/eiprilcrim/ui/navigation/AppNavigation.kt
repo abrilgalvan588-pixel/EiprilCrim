@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -23,6 +24,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.eiprilcrim.DashboardScreen
 import com.eiprilcrim.PantallaPrincipal
+import com.eiprilcrim.domain.model.ResultadoQuiz
+import com.eiprilcrim.domain.repository.CasoRepository
+import com.eiprilcrim.domain.repository.GlosarioRepository
+import com.eiprilcrim.domain.repository.ProtocoloRepository
+import com.eiprilcrim.domain.repository.ResultadoQuizRepository
 import com.eiprilcrim.ui.screens.BienvenidaScreen
 import com.eiprilcrim.ui.screens.CasosScreen
 import com.eiprilcrim.ui.screens.DetalleCasoScreen
@@ -34,17 +40,26 @@ import com.eiprilcrim.ui.screens.QuizScreen
 import com.eiprilcrim.ui.screens.ResultadoQuizScreen
 import com.eiprilcrim.ui.viewmodel.ThemeViewModel
 import com.eiprilcrim.ui.viewmodel.UsuarioViewModel
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AppNavigation(
     usuarioViewModel: UsuarioViewModel,
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    casoRepository: CasoRepository? = null,
+    glosarioRepository: GlosarioRepository? = null,
+    protocoloRepository: ProtocoloRepository? = null,
+    resultadoQuizRepository: ResultadoQuizRepository? = null
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val state by usuarioViewModel.uiState.collectAsState()
     val isLightModeEnabled by themeViewModel.isLightModeEnabled.collectAsState()
+    val scope = rememberCoroutineScope()
 
     // Ocultar la barra inferior en Bienvenida, Formulario, Resultado, Login y Detalle de Caso
     val mostrarBottomBar = when {
@@ -149,6 +164,7 @@ fun AppNavigation(
 
             composable(Screen.Casos.route) {
                 CasosScreen(
+                    casoRepository = casoRepository,
                     onCasoClick = { casoId ->
                         navController.navigate(Screen.DetalleCaso.createRoute(casoId))
                     },
@@ -186,21 +202,46 @@ fun AppNavigation(
                 val casoId = backStackEntry.arguments?.getInt("casoId") ?: 1
                 DetalleCasoScreen(
                     casoId = casoId,
+                    casoRepository = casoRepository,
                     onVolver = { navController.popBackStack() }
                 )
             }
 
             composable(Screen.Glosario.route) {
-                GlosarioScreen(tabInicial = 0)
+                GlosarioScreen(
+                    tabInicial = 0,
+                    glosarioRepository = glosarioRepository,
+                    protocoloRepository = protocoloRepository
+                )
             }
 
             composable(Screen.Protocolos.route) {
-                ProtocolosScreen()
+                GlosarioScreen(
+                    tabInicial = 1,
+                    glosarioRepository = glosarioRepository,
+                    protocoloRepository = protocoloRepository
+                )
             }
 
             composable(Screen.Quiz.route) {
                 QuizScreen(
                     onQuizFinalizado = { correctas, total ->
+                        val idUsuario = state.usuarioActual?.idUsuario ?: 0
+                        val fecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+                        val porcentaje = if (total > 0) (correctas * 100) / total else 0
+
+                        scope.launch {
+                            resultadoQuizRepository?.guardarResultado(
+                                ResultadoQuiz(
+                                    idUsuario = idUsuario,
+                                    correctas = correctas,
+                                    total = total,
+                                    porcentaje = porcentaje,
+                                    fecha = fecha
+                                )
+                            )
+                        }
+
                         navController.navigate(Screen.ResultadoQuiz.createRoute(correctas, total))
                     }
                 )
@@ -235,6 +276,7 @@ fun AppNavigation(
                 PerfilScreen(
                     usuarioActual = state.usuarioActual,
                     isLightModeEnabled = isLightModeEnabled,
+                    resultadoQuizRepository = resultadoQuizRepository,
                     onLightModeChange = { enabled ->
                         themeViewModel.setLightModeEnabled(enabled)
                     },

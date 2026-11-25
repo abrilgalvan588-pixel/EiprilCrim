@@ -33,8 +33,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,16 +50,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.R
 import com.eiprilcrim.domain.model.Usuario
+import com.eiprilcrim.domain.repository.ResultadoQuizRepository
 import com.eiprilcrim.ui.theme.EpiCrimTheme
 
 @Composable
 fun PerfilScreen(
     usuarioActual: Usuario? = null,
     isLightModeEnabled: Boolean = false,
+    resultadoQuizRepository: ResultadoQuizRepository? = null,
     onLightModeChange: (Boolean) -> Unit = {},
     onCerrarSesion: () -> Unit = {}
 ) {
     var notificacionesActivas by rememberSaveable { mutableStateOf(true) }
+    var ultimoPorcentajeQuiz by remember { mutableIntStateOf(80) }
+
+    LaunchedEffect(usuarioActual, resultadoQuizRepository) {
+        if (resultadoQuizRepository != null && usuarioActual != null) {
+            val ultimo = resultadoQuizRepository.obtenerUltimoResultado(usuarioActual.idUsuario)
+            if (ultimo != null) {
+                ultimoPorcentajeQuiz = ultimo.porcentaje
+            }
+        }
+    }
+
+    val progresoValor = (ultimoPorcentajeQuiz.toFloat() / 100f).coerceIn(0f, 1f)
 
     Column(
         modifier = Modifier
@@ -149,7 +166,7 @@ fun PerfilScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "60%",
+                        text = "$ultimoPorcentajeQuiz%",
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
@@ -159,7 +176,7 @@ fun PerfilScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 LinearProgressIndicator(
-                    progress = { 0.6f },
+                    progress = { progresoValor },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
@@ -219,7 +236,7 @@ fun PerfilScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Tarjeta "Quiz 1: 80%"
+        // Tarjeta "Quiz 1: X%"
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -247,7 +264,7 @@ fun PerfilScreen(
                     )
                 }
                 Text(
-                    text = "80%",
+                    text = "$ultimoPorcentajeQuiz%",
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold

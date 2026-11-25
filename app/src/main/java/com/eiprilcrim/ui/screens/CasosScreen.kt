@@ -36,8 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.R
+import com.eiprilcrim.domain.repository.CasoRepository
 
 data class CasoItem(
     val id: Int,
@@ -84,19 +87,40 @@ val listaCasosDemo = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CasosScreen(
+    casoRepository: CasoRepository? = null,
     onCasoClick: (Int) -> Unit = {},
     onNuevoCasoClick: () -> Unit = {},
     onVolver: () -> Unit = {}
 ) {
     var busqueda by rememberSaveable { mutableStateOf("") }
     var filtroNivel by rememberSaveable { mutableStateOf("Todos") }
+    var listaCasos by remember { mutableStateOf<List<CasoItem>>(emptyList()) }
 
     val niveles = listOf("Todos", "Fácil", "Medio", "Difícil")
 
-    val casosFiltrados = listaCasosDemo.filter { caso ->
-        val coincideNivel = filtroNivel == "Todos" || caso.nivel.equals(filtroNivel, ignoreCase = true)
-        val coincideBusqueda = busqueda.isBlank() || caso.titulo.contains(busqueda, ignoreCase = true) || caso.descripcion.contains(busqueda, ignoreCase = true)
-        coincideNivel && coincideBusqueda
+    LaunchedEffect(busqueda, filtroNivel, casoRepository) {
+        if (casoRepository != null) {
+            val casosDb = casoRepository.buscarCasos(busqueda, filtroNivel)
+            listaCasos = if (casosDb.isNotEmpty()) {
+                casosDb.map {
+                    CasoItem(
+                        id = it.id,
+                        titulo = it.titulo,
+                        descripcion = it.descripcion,
+                        categoria = it.categoria,
+                        nivel = it.nivel
+                    )
+                }
+            } else {
+                emptyList()
+            }
+        } else {
+            listaCasos = listaCasosDemo.filter { caso ->
+                val coincideNivel = filtroNivel == "Todos" || caso.nivel.equals(filtroNivel, ignoreCase = true)
+                val coincideBusqueda = busqueda.isBlank() || caso.titulo.contains(busqueda, ignoreCase = true) || caso.descripcion.contains(busqueda, ignoreCase = true)
+                coincideNivel && coincideBusqueda
+            }
+        }
     }
 
     Scaffold(
@@ -217,7 +241,7 @@ fun CasosScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${casosFiltrados.size} casos para desarrollar tu criterio.",
+                text = "${listaCasos.size} casos para desarrollar tu criterio.",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -225,7 +249,7 @@ fun CasosScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (casosFiltrados.isEmpty()) {
+            if (listaCasos.isEmpty()) {
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
                     text = "No se encontraron casos",
@@ -236,7 +260,7 @@ fun CasosScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
-                casosFiltrados.forEach { caso ->
+                listaCasos.forEach { caso ->
                     TarjetaCaso(
                         caso = caso,
                         onClick = { onCasoClick(caso.id) }

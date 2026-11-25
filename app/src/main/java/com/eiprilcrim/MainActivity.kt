@@ -58,7 +58,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AppNavigation(
                         usuarioViewModel = usuarioViewModel,
-                        themeViewModel = themeViewModel
+                        themeViewModel = themeViewModel,
+                        casoRepository = appContainer.appModule.casoRepository,
+                        glosarioRepository = appContainer.appModule.glosarioRepository,
+                        protocoloRepository = appContainer.appModule.protocoloRepository,
+                        resultadoQuizRepository = appContainer.appModule.resultadoQuizRepository
                     )
                 }
             }
