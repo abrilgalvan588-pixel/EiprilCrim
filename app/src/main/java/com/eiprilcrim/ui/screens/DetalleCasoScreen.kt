@@ -1,5 +1,7 @@
 package com.eiprilcrim.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,13 +46,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.domain.repository.CasoRepository
+import com.eiprilcrim.ui.utils.rememberIsLandscape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleCasoScreen(
     casoId: Int,
     casoRepository: CasoRepository? = null,
-    onVolver: () -> Unit = {}
+    onVolver: () -> Unit = {},
+    onIniciarAnalisis: (Int) -> Unit = {}
 ) {
     var casoGuardado by remember { mutableStateOf(false) }
     var casoActual by remember { mutableStateOf<CasoItem?>(null) }
@@ -75,41 +78,44 @@ fun DetalleCasoScreen(
         }
     }
 
+    val isLandscape = rememberIsLandscape()
+    BackHandler { onVolver() }
     val casoMostrado = casoActual ?: listaCasosDemo.first()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Caso ${casoMostrado.id}",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onVolver) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.onSurface
+            AnimatedVisibility(visible = !isLandscape) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Caso ${casoMostrado.id}",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
                         )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onVolver) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
                 )
-            )
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
@@ -233,7 +239,7 @@ fun DetalleCasoScreen(
 
             // Botón lila "Iniciar análisis"
             Button(
-                onClick = { /* Acción de análisis */ },
+                onClick = { onIniciarAnalisis(casoMostrado.id) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),

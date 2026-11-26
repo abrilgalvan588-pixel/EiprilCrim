@@ -1,6 +1,7 @@
 package com.eiprilcrim.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,22 +12,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eiprilcrim.R
+import com.eiprilcrim.ui.utils.rememberIsLandscape
 
 data class PreguntaQuiz(
     val id: Int,
@@ -108,226 +119,295 @@ val preguntasQuizDemo = listOf(
     )
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizScreen(
+    casoId: Int? = null,
+    onVolver: () -> Unit = {},
     onQuizFinalizado: (correctas: Int, total: Int) -> Unit = { _, _ -> }
 ) {
     var indicePregunta by rememberSaveable { mutableIntStateOf(0) }
     var opcionSeleccionada by rememberSaveable { mutableIntStateOf(-1) }
     var respuestasCorrectas by rememberSaveable { mutableIntStateOf(0) }
     var mensajeValidacion by rememberSaveable { mutableStateOf("") }
+    var mostrarDialogoSalida by remember { mutableStateOf(false) }
 
-    val preguntaActual = preguntasQuizDemo[indicePregunta]
-    val totalPreguntas = preguntasQuizDemo.size
-    val progreso = (indicePregunta + 1).toFloat() / totalPreguntas.toFloat()
+    val isLandscape = rememberIsLandscape()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.modulo_quiz),
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
+    val intentoSalir = {
+        if (indicePregunta > 0 || opcionSeleccionada != -1 || respuestasCorrectas > 0) {
+            mostrarDialogoSalida = true
+        } else {
+            onVolver()
+        }
+    }
+
+    BackHandler {
+        intentoSalir()
+    }
+
+    if (mostrarDialogoSalida) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoSalida = false },
+            title = { Text("Salir de la evaluación") },
+            text = { Text("Si sales ahora perderás tu progreso actual. ¿Deseas salir?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarDialogoSalida = false
+                    onVolver()
+                }) {
+                    Text("Salir", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoSalida = false }) {
+                    Text("Cancelar")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = stringResource(R.string.modulo_quiz_desc),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Barra de progreso "Pregunta X de Y"
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            AnimatedVisibility(visible = !isLandscape) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (casoId != null) "Análisis de Caso #$casoId" else "Quiz de Criminología",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { intentoSalir() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 20.dp)
         ) {
             Text(
-                text = "Pregunta ${indicePregunta + 1} de $totalPreguntas",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp,
+                text = if (casoId != null) "Evaluación de evidencias del caso" else stringResource(R.string.modulo_quiz),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
             Text(
-                text = "${(progreso * 100).toInt()}%",
+                text = if (casoId != null) "Analiza las preguntas y demuestra tu criterio pericial." else stringResource(R.string.modulo_quiz_desc),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 13.sp
+                fontSize = 14.sp
             )
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        LinearProgressIndicator(
-            progress = { progreso },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.primaryContainer,
-            gapSize = 0.dp,
-            drawStopIndicator = {}
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Tarjeta con la pregunta y opciones
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(18.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            // Barra de progreso "Pregunta X de Y"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = preguntaActual.pregunta,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 24.sp
+                    text = "Pregunta ${indicePregunta + 1} de ${preguntasQuizDemo.size}",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
                 )
+                val progreso = (indicePregunta + 1).toFloat() / preguntasQuizDemo.size.toFloat()
+                Text(
+                    text = "${(progreso * 100).toInt()}%",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp
+                )
+            }
 
-                Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                // Renderizar 4 Opciones con retroalimentación inmediata
-                preguntaActual.opciones.forEachIndexed { index, opcionText ->
-                    val esSeleccionada = opcionSeleccionada == index
-                    val esCorrecta = index == preguntaActual.respuestaCorrecta
+            val progreso = (indicePregunta + 1).toFloat() / preguntasQuizDemo.size.toFloat()
+            LinearProgressIndicator(
+                progress = { progreso },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primaryContainer,
+                gapSize = 0.dp,
+                drawStopIndicator = {}
+            )
 
-                    val colorBorde = when {
-                        opcionSeleccionada == -1 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        esSeleccionada && esCorrecta -> MaterialTheme.colorScheme.primary
-                        esSeleccionada && !esCorrecta -> MaterialTheme.colorScheme.error
-                        esCorrecta && opcionSeleccionada != -1 -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                    }
+            Spacer(modifier = Modifier.height(24.dp))
 
-                    val colorFondo = when {
-                        opcionSeleccionada == -1 -> MaterialTheme.colorScheme.surface
-                        esSeleccionada && esCorrecta -> MaterialTheme.colorScheme.primaryContainer
-                        esSeleccionada && !esCorrecta -> MaterialTheme.colorScheme.errorContainer
-                        esCorrecta && opcionSeleccionada != -1 -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.surface
-                    }
+            val preguntaActual = preguntasQuizDemo[indicePregunta]
 
-                    val colorTexto = when {
-                        opcionSeleccionada == -1 -> MaterialTheme.colorScheme.onSurface
-                        esSeleccionada && esCorrecta -> MaterialTheme.colorScheme.primary
-                        esSeleccionada && !esCorrecta -> MaterialTheme.colorScheme.error
-                        esCorrecta && opcionSeleccionada != -1 -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+            // Tarjeta con la pregunta y opciones
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = preguntaActual.pregunta,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 24.sp
+                    )
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 5.dp)
-                            .border(width = 1.dp, color = colorBorde, shape = RoundedCornerShape(12.dp))
-                            .clickable {
-                                if (opcionSeleccionada == -1) {
-                                    opcionSeleccionada = index
-                                    mensajeValidacion = ""
-                                    if (index == preguntaActual.respuestaCorrecta) {
-                                        respuestasCorrectas++
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    preguntaActual.opciones.forEachIndexed { index, opcionText ->
+                        val esSeleccionada = opcionSeleccionada == index
+                        val esCorrecta = index == preguntaActual.respuestaCorrecta
+
+                        val colorBorde = when {
+                            opcionSeleccionada == -1 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            esSeleccionada && esCorrecta -> MaterialTheme.colorScheme.primary
+                            esSeleccionada && !esCorrecta -> MaterialTheme.colorScheme.error
+                            esCorrecta && opcionSeleccionada != -1 -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        }
+
+                        val colorFondo = when {
+                            opcionSeleccionada == -1 -> MaterialTheme.colorScheme.surface
+                            esSeleccionada && esCorrecta -> MaterialTheme.colorScheme.primaryContainer
+                            esSeleccionada && !esCorrecta -> MaterialTheme.colorScheme.errorContainer
+                            esCorrecta && opcionSeleccionada != -1 -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.surface
+                        }
+
+                        val colorTexto = when {
+                            opcionSeleccionada == -1 -> MaterialTheme.colorScheme.onSurface
+                            esSeleccionada && esCorrecta -> MaterialTheme.colorScheme.primary
+                            esSeleccionada && !esCorrecta -> MaterialTheme.colorScheme.error
+                            esCorrecta && opcionSeleccionada != -1 -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 5.dp)
+                                .border(width = 1.dp, color = colorBorde, shape = RoundedCornerShape(12.dp))
+                                .clickable {
+                                    if (opcionSeleccionada == -1) {
+                                        opcionSeleccionada = index
+                                        mensajeValidacion = ""
+                                        if (index == preguntaActual.respuestaCorrecta) {
+                                            respuestasCorrectas++
+                                        }
                                     }
-                                }
-                            },
-                        colors = CardDefaults.cardColors(containerColor = colorFondo),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = opcionText,
-                            color = colorTexto,
-                            fontSize = 14.sp,
-                            fontWeight = if (esSeleccionada || (opcionSeleccionada != -1 && esCorrecta)) FontWeight.Bold else FontWeight.Normal,
-                            modifier = Modifier.padding(14.dp)
-                        )
-                    }
-                }
-
-                // Retroalimentación explicativa tras seleccionar opción
-                if (opcionSeleccionada != -1) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    val fueCorrecta = opcionSeleccionada == preguntaActual.respuestaCorrecta
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (fueCorrecta) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                            else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
+                                },
+                            colors = CardDefaults.cardColors(containerColor = colorFondo),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
                             Text(
-                                text = if (fueCorrecta) "✓ ¡Correcto!" else "✗ Respuesta incorrecta",
-                                color = if (fueCorrecta) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                text = opcionText,
+                                color = colorTexto,
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = if (esSeleccionada || (opcionSeleccionada != -1 && esCorrecta)) FontWeight.Bold else FontWeight.Normal,
+                                modifier = Modifier.padding(14.dp)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = preguntaActual.explicacion,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 12.sp,
-                                lineHeight = 17.sp
-                            )
+                        }
+                    }
+
+                    if (opcionSeleccionada != -1) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        val fueCorrecta = opcionSeleccionada == preguntaActual.respuestaCorrecta
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (fueCorrecta) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(14.dp)) {
+                                Text(
+                                    text = if (fueCorrecta) "✓ ¡Correcto!" else "✗ Respuesta incorrecta",
+                                    color = if (fueCorrecta) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = preguntaActual.explicacion,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 12.sp,
+                                    lineHeight = 17.sp
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (mensajeValidacion.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = mensajeValidacion,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+            if (mensajeValidacion.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = mensajeValidacion,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón Siguiente / Ver Resultados
-        Button(
-            onClick = {
-                if (opcionSeleccionada == -1) {
-                    mensajeValidacion = "Selecciona una opción antes de continuar."
-                } else {
-                    if (indicePregunta < totalPreguntas - 1) {
-                        indicePregunta++
-                        opcionSeleccionada = -1
-                        mensajeValidacion = ""
+            Button(
+                onClick = {
+                    if (opcionSeleccionada == -1) {
+                        mensajeValidacion = "Selecciona una opción antes de continuar."
                     } else {
-                        onQuizFinalizado(respuestasCorrectas, totalPreguntas)
+                        if (indicePregunta < preguntasQuizDemo.size - 1) {
+                            indicePregunta++
+                            opcionSeleccionada = -1
+                            mensajeValidacion = ""
+                        } else {
+                            onQuizFinalizado(respuestasCorrectas, preguntasQuizDemo.size)
+                        }
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Text(
-                text = if (indicePregunta < totalPreguntas - 1) "Siguiente pregunta" else "Ver resultados",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = if (indicePregunta < preguntasQuizDemo.size - 1) "Siguiente pregunta" else "Ver resultados",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

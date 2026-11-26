@@ -13,7 +13,9 @@ sealed class Screen(val route: String) {
     }
     object Glosario : Screen("glosario")
     object Protocolos : Screen("protocolos")
-    object Quiz : Screen("quiz")
+    object Quiz : Screen("quiz?casoId={casoId}") {
+        fun createRoute(casoId: Int? = null) = if (casoId != null) "quiz?casoId=$casoId" else "quiz"
+    }
     object ResultadoQuiz : Screen("resultado_quiz?correctas={correctas}&total={total}") {
         fun createRoute(correctas: Int = 4, total: Int = 5) = "resultado_quiz?correctas=$correctas&total=$total"
     }

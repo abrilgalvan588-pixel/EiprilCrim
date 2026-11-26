@@ -1,5 +1,10 @@
 package com.eiprilcrim.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -38,6 +43,7 @@ import com.eiprilcrim.ui.screens.PerfilScreen
 import com.eiprilcrim.ui.screens.ProtocolosScreen
 import com.eiprilcrim.ui.screens.QuizScreen
 import com.eiprilcrim.ui.screens.ResultadoQuizScreen
+import com.eiprilcrim.ui.utils.rememberIsLandscape
 import com.eiprilcrim.ui.viewmodel.ThemeViewModel
 import com.eiprilcrim.ui.viewmodel.UsuarioViewModel
 import kotlinx.coroutines.launch
@@ -61,9 +67,12 @@ fun AppNavigation(
     val isLightModeEnabled by themeViewModel.isLightModeEnabled.collectAsState()
     val scope = rememberCoroutineScope()
 
-    // Ocultar la barra inferior en Bienvenida, Formulario, Resultado, Login y Detalle de Caso
+    val isLandscape = rememberIsLandscape()
+
+    // Ocultar la barra inferior en horizontal (landscape), Bienvenida, Formulario, Resultado, Login y Detalle de Caso
     val mostrarBottomBar = when {
         currentRoute == null -> false
+        isLandscape -> false
         currentRoute == Screen.Login.route -> false
         currentRoute == Screen.Bienvenida.route -> false
         currentRoute.startsWith("formulario_caso") -> false
@@ -76,7 +85,11 @@ fun AppNavigation(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (mostrarBottomBar) {
+            AnimatedVisibility(
+                visible = mostrarBottomBar,
+                enter = fadeIn() + slideInVertically { it },
+                exit = fadeOut() + slideOutVertically { it }
+            ) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface
@@ -86,14 +99,12 @@ fun AppNavigation(
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                if (currentRoute != item.route) {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                navController.navigate(item.route) {
+                                    popUpTo(Screen.Dashboard.route) {
+                                        saveState = true
                                     }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             },
                             icon = {
@@ -203,7 +214,10 @@ fun AppNavigation(
                 DetalleCasoScreen(
                     casoId = casoId,
                     casoRepository = casoRepository,
-                    onVolver = { navController.popBackStack() }
+                    onVolver = { navController.popBackStack() },
+                    onIniciarAnalisis = { id ->
+                        navController.navigate(Screen.Quiz.createRoute(id))
+                    }
                 )
             }
 
@@ -223,8 +237,15 @@ fun AppNavigation(
                 )
             }
 
-            composable(Screen.Quiz.route) {
+            composable(
+                route = Screen.Quiz.route,
+                arguments = listOf(navArgument("casoId") { type = NavType.IntType; defaultValue = -1 })
+            ) { backStackEntry ->
+                val idArg = backStackEntry.arguments?.getInt("casoId") ?: -1
+                val casoId = if (idArg != -1) idArg else null
                 QuizScreen(
+                    casoId = casoId,
+                    onVolver = { navController.popBackStack() },
                     onQuizFinalizado = { correctas, total ->
                         val idUsuario = state.usuarioActual?.idUsuario ?: 0
                         val fecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
